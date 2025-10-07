@@ -7,6 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
 import { toast } from '@/components/ui/use-toast';
+import ColoringGame from '@/components/ColoringGame';
+import MathGame from '@/components/MathGame';
+import PuzzleGame from '@/components/PuzzleGame';
+import MusicGame from '@/components/MusicGame';
+import VoiceAssistant from '@/components/VoiceAssistant';
+import MemoryGame from '@/components/MemoryGame';
 
 interface GameSection {
   id: string;
@@ -28,6 +34,7 @@ interface UserData {
 
 const Index = () => {
   const [isRegistered, setIsRegistered] = useState(false);
+  const [currentGame, setCurrentGame] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     surname: '',
@@ -86,13 +93,26 @@ const Index = () => {
     },
     {
       id: 'games',
-      name: 'Игры',
+      name: 'Игры на память',
       icon: 'Gamepad2',
       color: 'text-coral',
       bgColor: 'bg-coral/10 hover:bg-coral/20',
-      description: 'Мини-игры'
+      description: 'Найди пары'
     }
   ];
+
+  const handleGameClick = (gameId: string) => {
+    setCurrentGame(gameId);
+    const newStars = (userData?.stars || 0) + 1;
+    setUserData(prev => prev ? { ...prev, stars: newStars } : null);
+  };
+
+  if (currentGame === 'coloring') return <ColoringGame onBack={() => setCurrentGame(null)} />;
+  if (currentGame === 'learning') return <MathGame onBack={() => setCurrentGame(null)} />;
+  if (currentGame === 'puzzles') return <PuzzleGame onBack={() => setCurrentGame(null)} />;
+  if (currentGame === 'music') return <MusicGame onBack={() => setCurrentGame(null)} />;
+  if (currentGame === 'voice') return <VoiceAssistant onBack={() => setCurrentGame(null)} />;
+  if (currentGame === 'games') return <MemoryGame onBack={() => setCurrentGame(null)} />;
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
@@ -263,6 +283,7 @@ const Index = () => {
           {gameSections.map((section, index) => (
             <Card
               key={section.id}
+              onClick={() => handleGameClick(section.id)}
               className={`${section.bgColor} border-0 p-6 rounded-4xl cursor-pointer transition-all hover:scale-105 hover:shadow-xl animate-slide-up`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
