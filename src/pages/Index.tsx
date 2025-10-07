@@ -2,7 +2,11 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
+import { toast } from '@/components/ui/use-toast';
 
 interface GameSection {
   id: string;
@@ -13,13 +17,23 @@ interface GameSection {
   description: string;
 }
 
+interface UserData {
+  name: string;
+  surname: string;
+  phone: string;
+  level: number;
+  stars: number;
+  achievements: number;
+}
+
 const Index = () => {
-  const [userProgress] = useState({
-    name: 'Максим',
-    level: 5,
-    stars: 87,
-    achievements: 12
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    surname: '',
+    phone: ''
   });
+  const [userData, setUserData] = useState<UserData | null>(null);
 
   const gameSections: GameSection[] = [
     {
@@ -80,6 +94,112 @@ const Index = () => {
     }
   ];
 
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name || !formData.surname) {
+      toast({
+        title: "Ошибка",
+        description: "Пожалуйста, заполни имя и фамилию",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newUser: UserData = {
+      name: formData.name,
+      surname: formData.surname,
+      phone: formData.phone,
+      level: 1,
+      stars: 0,
+      achievements: 0
+    };
+
+    setUserData(newUser);
+    setIsRegistered(true);
+    toast({
+      title: "Добро пожаловать! 🎉",
+      description: `${formData.name}, ты готов к приключениям!`
+    });
+  };
+
+  if (!isRegistered) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-softWhite via-mint/5 to-yellow/5 p-4 md:p-8 flex items-center justify-center">
+        <Card className="max-w-2xl w-full bg-white rounded-4xl border-0 shadow-2xl p-8 md:p-12 animate-scale-in">
+          <div className="text-center mb-8">
+            <div className="inline-block bg-gradient-to-r from-coral to-yellow rounded-full p-6 mb-6 animate-bounce-slow">
+              <div className="text-6xl">🚂</div>
+            </div>
+            <h1 className="text-4xl md:text-5xl text-coral mb-4 font-fredoka">
+              Привет, друг! 👋
+            </h1>
+            <p className="text-xl text-gray-600">
+              Давай познакомимся! Расскажи мне о себе
+            </p>
+          </div>
+
+          <form onSubmit={handleRegister} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-lg font-nunito text-gray-700">
+                Как тебя зовут? *
+              </Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Введи своё имя"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="h-14 text-lg rounded-3xl border-2 border-gray-200 focus:border-coral"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="surname" className="text-lg font-nunito text-gray-700">
+                Твоя фамилия *
+              </Label>
+              <Input
+                id="surname"
+                type="text"
+                placeholder="Введи свою фамилию"
+                value={formData.surname}
+                onChange={(e) => setFormData({ ...formData, surname: e.target.value })}
+                className="h-14 text-lg rounded-3xl border-2 border-gray-200 focus:border-yellow"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-lg font-nunito text-gray-700">
+                Телефон родителей (если есть)
+              </Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+7 (999) 123-45-67"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className="h-14 text-lg rounded-3xl border-2 border-gray-200 focus:border-mint"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full h-16 text-xl font-fredoka bg-gradient-to-r from-coral to-yellow text-white rounded-3xl hover:scale-105 transition-transform shadow-lg"
+            >
+              Начать играть! 🚀
+            </Button>
+          </form>
+
+          <div className="mt-8 text-center text-gray-500 text-sm">
+            <p>🔒 Твои данные в безопасности</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-softWhite via-mint/5 to-yellow/5 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
@@ -87,7 +207,7 @@ const Index = () => {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-4xl md:text-5xl text-coral mb-2">
-                Привет, {userProgress.name}! 👋
+                Привет, {userData?.name}! 👋
               </h1>
               <p className="text-xl text-gray-600">Во что поиграем сегодня?</p>
             </div>
@@ -95,11 +215,11 @@ const Index = () => {
             <div className="hidden md:flex items-center gap-4">
               <Badge className="bg-yellow text-white text-lg px-4 py-2 rounded-3xl">
                 <Icon name="Star" size={20} className="mr-1" />
-                {userProgress.stars} звёзд
+                {userData?.stars} звёзд
               </Badge>
               <Badge className="bg-coral text-white text-lg px-4 py-2 rounded-3xl">
                 <Icon name="Trophy" size={20} className="mr-1" />
-                Уровень {userProgress.level}
+                Уровень {userData?.level}
               </Badge>
             </div>
           </div>
@@ -169,15 +289,15 @@ const Index = () => {
               <Avatar className="h-20 w-20 border-4 border-coral">
                 <AvatarImage src="" />
                 <AvatarFallback className="bg-gradient-to-br from-coral to-yellow text-white text-2xl font-fredoka">
-                  {userProgress.name[0]}
+                  {userData?.name[0]}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <h3 className="text-2xl font-fredoka text-gray-800 mb-1">
-                  {userProgress.name}
+                  {userData?.name} {userData?.surname}
                 </h3>
                 <p className="text-gray-600">
-                  Уровень {userProgress.level} • {userProgress.achievements} достижений
+                  Уровень {userData?.level} • {userData?.achievements} достижений
                 </p>
               </div>
             </div>
@@ -185,19 +305,19 @@ const Index = () => {
             <div className="flex gap-6">
               <div className="text-center">
                 <div className="text-4xl font-fredoka text-coral mb-1">
-                  {userProgress.stars}
+                  {userData?.stars}
                 </div>
                 <div className="text-sm text-gray-600">Звёзд собрано</div>
               </div>
               <div className="text-center">
                 <div className="text-4xl font-fredoka text-yellow mb-1">
-                  {userProgress.achievements}
+                  {userData?.achievements}
                 </div>
                 <div className="text-sm text-gray-600">Достижений</div>
               </div>
               <div className="text-center">
                 <div className="text-4xl font-fredoka text-mint mb-1">
-                  {userProgress.level}
+                  {userData?.level}
                 </div>
                 <div className="text-sm text-gray-600">Уровень</div>
               </div>
